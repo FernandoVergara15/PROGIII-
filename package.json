@@ -2,13 +2,13 @@
   "name": "clase",
   "version": "1.0.0",
   "description": "aplicacion de reservas cada de cumpleaños",
-  "main": "index.js",
+  "main": "reservas.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node --watch index.js"
+    "dev": "node --watch reservas.js"
   },
-  "author": "fernando vergara",
+  "author": "Fernando Vergara",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^17.2.3",

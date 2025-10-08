@@ -23,6 +23,7 @@ en este caso donde se encuentra el index.js
 */
 
 const app = express();
+
 /* middleware
  para que parsee (analiza y entienda) 
 lo que llega sera en formato JSON y muestre 
@@ -42,7 +43,6 @@ luego se usara para crear las reservas.
 cuando se utilize como una funcion
 no vamos a resivirlo del cliente
 porque vamos a tener esos datos en la BD*/
-
 app.post("/notificacion", async (req, res) => {
   console.log(req.body);
   // verificacion de datos segun el archivo. json
@@ -132,6 +132,7 @@ app.get("/salones", async (req, res) => {
     res.status(500).json({ ok: false, mensaje: "Error en el servidor" });
   }
 });
+
 // ruta tipo GET para obtener 1 salon por su ID
 // se define un query param para identificar el salon
 // en la ruta se define :id
@@ -161,6 +162,131 @@ app.get("/salones/:salon_id", async (req, res) => {
   }
 });
 
+// ruta para crear un salon
+app.post("/salones", async (req, res) => {
+  try {
+    if (
+      !req.body.titulo ||
+      !req.body.direccion ||
+      !req.body.capacidad ||
+      !req.body.importe
+    ) {
+      return res.status(400).json({
+        estado: false,
+        mensaje: "faltan campos requeridos",
+      });
+    }
+    // desestructuracion del objeto req.body al igual que el post de notificacion
+    const { titulo, direccion, capacidad, importe } = req.body;
+    const valores = [titulo, direccion, capacidad, importe];
+    const sql = `INSERT INTO salones (titulo, direccion, capacidad, importe) VALUES (?,?,?,?)`;
+    const [results] = await conexion.query(sql, valores);
+    console.log(results);
+
+    /*luego las validaciones por ejemplo x > 0 
+    se haran con un middleware seria el express
+    validator*/
+
+    res
+      .status(201)
+      // retorna el id del salon creado en la base de datos
+      .json({
+        estado: true,
+        mensaje: `Salón creado con ID: ${results.insertId}`,
+        salonCreado: {
+          salon_id: results.insertId,
+          titulo: titulo,
+          direccion: direccion,
+          capacidad: capacidad,
+          importe: importe,
+        },
+      });
+  } catch (error) {
+    console.log("error en POST /salones", error);
+    res.status(500).json({ ok: false, mensaje: "Error en el servidor" });
+  }
+});
+
+// ruta para modificar un recurso en la BD
+/* diferencia entre path y put 
+patch modifica un campo
+put modifica todo el recurso
+en este caso se usa put por que se modifican todos los campos
+se usa un query param para identificar el salon a modificar
+se accede al ID con req.params.salon_id */
+app.put("/salones/:salon_id", async (req, res) => {
+  try {
+    // capturo el ID del parametro de la ruta
+    const salon_id = req.params.salon_id;
+    // validacion de campos requeridos
+    if (
+      !req.body.titulo ||
+      !req.body.direccion ||
+      !req.body.capacidad ||
+      !req.body.importe
+    ) {
+      return res.status(400).json({
+        estado: false,
+        mensaje: "faltan campos requeridos",
+      });
+    }
+    // desestructuracion del objeto req.body
+    const { titulo, direccion, capacidad, importe } = req.body;
+    // valores a modificar en la BD
+    const valores = [titulo, direccion, capacidad, importe, salon_id];
+    // SQL seguro con placeholder
+    const sql = `UPDATE salones SET titulo = ?, direccion = ?, capacidad = ?, importe = ? WHERE salon_id = ?`;
+    // ejecuto la consulta en la BD
+    const [results] = await conexion.query(sql, valores);
+    console.log(results);
+    // si no se modifico ningun registro es por que el ID no existe
+    if (results.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ estado: false, mensaje: "El ID de ese salon no existe" });
+    }
+
+    res.status(200).json({
+      estado: true,
+      mensaje: `Salón modificado con ID: ${salon_id}`,
+    });
+  } catch (error) {
+    console.log("error en PUT /salones/:salon_id", error);
+    res.status(500).json({ ok: false, mensaje: "Error en el servidor" });
+  }
+});
+
+// ruta para eliminar un salon
+// se usara un query param para identificar el salon a eliminar
+// se accede al ID con req.params.salon_id
+// eliminacion logica, no se elimina el registro de la BD
+// solo se cambia el campo activo a 0
+app.delete("/salones/:salon_id", async (req, res) => {
+  try {
+    // capturo el ID del parametro de la ruta
+    const salon_id = req.params.salon_id;
+    // SQL seguro con placeholder
+    // const sql = `DELETE * FROM salones WHERE activo = 1 AND salon_id = ?`;
+    // Eliminación lógica: solo actualizamos el campo activo
+    const sql = `UPDATE salones SET activo = 0 WHERE salon_id = ? AND activo = 1`;
+    // ejecuto la consulta en la BD
+    const [results] = await conexion.query(sql, [salon_id]);
+    // si no se modifico ningun registro es por que el ID no existe
+    if (results.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ estado: false, mensaje: "El ID de ese salon no existe" });
+    }
+    res.status(200).json({
+      estado: true,
+      mensaje: `Salón eliminado con ID: ${salon_id}`,
+    });
+  } catch (error) {
+    console.log("error en DELETE /salones/:salon_id", error);
+    res.status(500).json({ ok: false, mensaje: "Error en el servidor" });
+  }
+});
+
 /*
 no esta bueno colocar el puerto definido por que se 
 usaran variables de entorno para mas seguridad con 
@@ -174,9 +300,7 @@ app.listen(3000, () =>{
     console.log(`servidor disponible`);
 })
 */
-
 process.loadEnvFile();
-
 app.listen(process.env.PUERTO, () => {
   console.log(`servidor disponible en: ${process.env.PUERTO}`);
 });
