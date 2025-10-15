@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "des": "nodemon --watch src/servidor.js"
+    "des": "node --watch src/servidor.js"
   },
   "author": "Fernando Vergara",
   "license": "ISC",
