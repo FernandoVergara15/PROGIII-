@@ -1,47 +1,229 @@
 import express from "express";
 import SalonesControlador from "../../controladores/salonesControlador.js";
 import { body } from "express-validator";
-import validar from "../../middlewares/middleSalones.js";
+import validarCampos from "../../middlewares/validarCampos.js";
 import apicache from "apicache";
+import autorizarUsuarios from "../../middlewares/autorizarUsuarios.js";
 
-//instanciar la clase para podewr usar sus metodos
 const salonesControlador = new SalonesControlador();
 const router = express.Router();
- /* segun voy haciendo solicitudes
- el cache gestiona las solicitudes y no deja pasar
- mas de una solicitud en el tiempo que le indico
- si llega otra solicitud en ese tiempo responde con el cache */
 let cache = apicache.middleware;
 
+const validacionesSalon = [
+  body("titulo").notEmpty().withMessage("falta el valor titulo"),
+  body("direccion").notEmpty().withMessage("falta el valor direccion"),
+  body("capacidad")
+    .notEmpty()
+    .withMessage("falta el valor capacidad")
+    .isInt({ min: 1 })
+    .withMessage("La capacidad debe ser número"),
+  body("importe")
+    .notEmpty()
+    .withMessage("falta el valor importe")
+    .isFloat({ min: 1 })
+    .withMessage("El importe debe ser número"),
+  validarCampos,
+];
+
+/**
+ * @swagger
+ * tags:
+ *   name: Salones
+ *   description: Endpoints para la gestión de salones de eventos
+ */
+
+/**
+ * @swagger
+ * /api/v1/salones:
+ *   get:
+ *     summary: Lista todos los salones disponibles
+ *     description: Devuelve todos los salones activos en el sistema. Los clientes también pueden acceder.
+ *     tags: [Salones]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Lista de salones obtenida correctamente
+ *       '401':
+ *         description: No autenticado (token inválido o ausente)
+ *       '500':
+ *         description: Error interno del servidor
+ */
+router.get(
+  "/",
+  autorizarUsuarios([1, 2, 3]),
+  cache("5 minutes"),
+  salonesControlador.read
+);
+
+/**
+ * @swagger
+ * /api/v1/salones/{id}:
+ *   get:
+ *     summary: Obtiene un salón por su ID
+ *     description: Permite a administradores y empleados consultar la información detallada de un salón.
+ *     tags: [Salones]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del salón a buscar
+ *     responses:
+ *       '200':
+ *         description: Salón encontrado
+ *       '401':
+ *         description: No autenticado
+ *       '403':
+ *         description: No autorizado
+ *       '404':
+ *         description: Salón no encontrado
+ *       '500':
+ *         description: Error interno del servidor
+ */
+router.get(
+  "/:id",
+  autorizarUsuarios([1, 2]),
+  cache("2 minutes"),
+  salonesControlador.buscarPorId
+);
+
+/**
+ * @swagger
+ * /api/v1/salones:
+ *   post:
+ *     summary: Crea un nuevo salón
+ *     description: Solo administradores y empleados pueden registrar nuevos salones.
+ *     tags: [Salones]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - titulo
+ *               - direccion
+ *               - capacidad
+ *               - importe
+ *             properties:
+ *               titulo:
+ *                 type: string
+ *                 example: "Salón Primavera"
+ *               direccion:
+ *                 type: string
+ *                 example: "Av. Siempre Viva 742"
+ *               capacidad:
+ *                 type: integer
+ *                 example: 100
+ *               importe:
+ *                 type: number
+ *                 format: float
+ *                 example: 25000
+ *     responses:
+ *       '201':
+ *         description: Salón creado exitosamente
+ *       '400':
+ *         description: Error de validación en los datos
+ *       '401':
+ *         description: No autenticado
+ *       '403':
+ *         description: No autorizado
+ *       '500':
+ *         description: Error interno del servidor
+ */
 router.post(
   "/",
-  cache("5 minutes"),
-  [
-    body("titulo").notEmpty().withMessage("falta el valor titulo"),
-    body("direccion").notEmpty().withMessage("falta el valor direccion"),
-    body("capacidad")
-      .notEmpty()
-      .withMessage("falta el valor capacidad")
-      .isInt({ min: 1 })
-      .withMessage("La capacidad debe ser numero"),
-    body("importe")
-      .notEmpty()
-      .withMessage("falta el valor importe")
-      .isInt({ min: 1 })
-      .withMessage("El importe debe ser numero"),
-    validar,
-  ],
-  salonesControlador.createSalon
+  autorizarUsuarios([1, 2]),
+  validacionesSalon,
+  salonesControlador.create
 );
-// YA TENGO CLARO EL MIDDLEWARE LUEGO MODIFICO LAS DEMAS RUTAS
-// al igual en el controlador
 
-router.get("/", cache("5 minutes"), salonesControlador.readSalones);
-router.get("/:id", cache("5 minutes"), salonesControlador.buscarSalonPorId);
-router.put("/:id", cache("5 minutes"), salonesControlador.updateSalon);
- /* delete no elimina el registro de la base de datos
- solo lo pone en inactivo
- como se pidio en clase */
-router.delete("/:id", cache("5 minutes"), salonesControlador.deleteSalon);
+/**
+ * @swagger
+ * /api/v1/salones/{id}:
+ *   put:
+ *     summary: Actualiza un salón existente
+ *     description: Solo administradores y empleados pueden actualizar la información de un salón.
+ *     tags: [Salones]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del salón a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               titulo:
+ *                 type: string
+ *               direccion:
+ *                 type: string
+ *               capacidad:
+ *                 type: integer
+ *               importe:
+ *                 type: number
+ *     responses:
+ *       '200':
+ *         description: Salón actualizado exitosamente
+ *       '400':
+ *         description: Datos inválidos
+ *       '401':
+ *         description: No autenticado
+ *       '403':
+ *         description: No autorizado
+ *       '404':
+ *         description: Salón no encontrado
+ *       '500':
+ *         description: Error interno del servidor
+ */
+router.put(
+  "/:id",
+  autorizarUsuarios([1, 2]),
+  validacionesSalon,
+  salonesControlador.update
+);
+
+/**
+ * @swagger
+ * /api/v1/salones/{id}:
+ *   delete:
+ *     summary: Elimina (borrado lógico) un salón
+ *     description: Solo administradores y empleados pueden eliminar un salón. El borrado es lógico, no físico.
+ *     tags: [Salones]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del salón a eliminar
+ *     responses:
+ *       '200':
+ *         description: Salón eliminado correctamente
+ *       '401':
+ *         description: No autenticado
+ *       '403':
+ *         description: No autorizado
+ *       '404':
+ *         description: Salón no encontrado
+ *       '500':
+ *         description: Error interno del servidor
+ */
+router.delete("/:id", autorizarUsuarios([1, 2]), salonesControlador.delete);
 
 export { router };

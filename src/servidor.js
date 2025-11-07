@@ -1,4 +1,7 @@
 import app from "./reservas.js";
+import setupSwagger from "./config/swagger.js";
+
+setupSwagger(app);
 
 process.loadEnvFile();
 
