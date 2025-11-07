@@ -3,10 +3,6 @@ import passport from "passport";
 import morgan from "morgan";
 import fs from "fs";
 
-// --- 1. IMPORTA SWAGGER ---
-import swaggerUi from "swagger-ui-express";
-import swaggerJsdoc from "swagger-jsdoc";
-
 import { estrategia, validacion } from "./config/passport.js";
 
 import { router as v1AuthRouter } from "./v1/rutas/authRoutes.js";
@@ -30,55 +26,9 @@ app.use(morgan("combined", { stream: log }));
 // --- RUTAS PÚBLICAS ---
 app.use("/api/v1/auth", v1AuthRouter);
 
-// --- 2. CONFIGURACIÓN DE SWAGGER ---
-const swaggerOptions = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "API Salones de Fiestas (PROG 3)",
-      version: "1.0.0",
-      description: "Documentación de la API de Reservas de Salones",
-    },
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-        },
-      },
-      schemas: {
-        ReservaInput: {
-          type: "object",
-          properties: {
-            /* ... (tus propiedades de reserva) ... */
-          },
-        },
-        UsuarioInput: {
-          type: "object",
-          properties: {
-            /* ... (tus propiedades de usuario) ... */
-          },
-        },
-      },
-    },
-    security: [{ bearerAuth: [] }],
-  },
-  // ---- ¡IMPORTANTE! Asegúrate que esta ruta sea correcta ----
-  apis: ["./src/v1/rutas/*.js"],
-};
-
-// 3. CREA LAS ESPECIFICACIONES
-const specs = swaggerJsdoc(swaggerOptions);
-
 // --- Middlewares ---
 app.use(express.json());
 // 4. SIRVE LA DOCUMENTACIÓN (Ruta pública)
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(specs, { explorer: true })
-);
 
 // --- RUTAS PROTEGIDAS ---
 app.use(
