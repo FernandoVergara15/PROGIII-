@@ -201,7 +201,7 @@ router.put(
  * /api/v1/salones/{id}:
  *   delete:
  *     summary: Elimina (borrado lógico) un salón
- *     description: Solo administradores y empleados pueden eliminar un salón. El borrado es lógico, no físico.
+ *     description: Solo administradores y empleados pueden delete un salón. El borrado es lógico, no físico.
  *     tags: [Salones]
  *     security:
  *       - bearerAuth: []
@@ -211,7 +211,7 @@ router.put(
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID del salón a eliminar
+ *         description: ID del salón a delete
  *     responses:
  *       '200':
  *         description: Salón eliminado correctamente

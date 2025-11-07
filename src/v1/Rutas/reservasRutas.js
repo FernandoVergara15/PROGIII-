@@ -165,7 +165,7 @@ router.get(
  *       '401':
  *         description: No autenticado
  *       '403':
- *         description: No autorizado (ej. Empleado intentando crear)
+ *         description: No autorizado (ej. Empleado intentando create)
  *       '500':
  *         description: Error interno del servidor
  */
@@ -232,7 +232,7 @@ router.put(
  *         required: true
  *         schema:
  *           type: integer
- *         description: El ID de la reserva a eliminar
+ *         description: El ID de la reserva a delete
  *     responses:
  *       '200':
  *         description: Reserva eliminada (desactivada) exitosamente

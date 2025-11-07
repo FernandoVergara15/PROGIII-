@@ -185,7 +185,7 @@ router.put(
  * /api/v1/servicios/{servicio_id}:
  *   delete:
  *     summary: Elimina (borrado lógico) un servicio
- *     description: Solo administradores y empleados pueden eliminar un servicio. El borrado es lógico, no físico.
+ *     description: Solo administradores y empleados pueden delete un servicio. El borrado es lógico, no físico.
  *     tags: [Servicios]
  *     security:
  *       - bearerAuth: []
@@ -195,7 +195,7 @@ router.put(
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID del servicio a eliminar
+ *         description: ID del servicio a delete
  *     responses:
  *       '200':
  *         description: Servicio eliminado correctamente

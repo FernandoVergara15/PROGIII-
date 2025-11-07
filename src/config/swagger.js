@@ -75,6 +75,7 @@ const swaggerOptions = {
       "./src/v1/rutas/serviciosRutas.js",
       "./src/v1/rutas/salonesRutas.js",
       "./src/v1/rutas/reservasRutas.js",
+      "./src/v1/rutas/turnosRutas.js",
   ], // ¡Ajusta esta ruta a tu proyecto!
 };
 

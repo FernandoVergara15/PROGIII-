@@ -1,53 +1,62 @@
-import Turnos from "../db/turnos.js";
+import TurnosServicio from "../servicios/turnosServicio.js";
 
 export default class TurnosControlador {
   constructor() {
-    this.turnosServicio = new Turnos();
+    this.turnosServicio = new TurnosServicio();
   }
 
-  // Crear un turno
-  createTurno = async (req, res) => {
+  /**
+   * (Antes 'create')
+   * Crea un turno.
+   * La validación de 'orden', 'hora_desde', 'hora_hasta'
+   * se delega al middleware 'validarCampos' en la ruta.
+   */
+  create = async (req, res) => {
     try {
-      const { orden, hora_desde, hora_hasta } = req.body;
+      const turno = req.body;
 
-      if (!orden || !hora_desde || !hora_hasta) {
-        return res.status(400).json({
-          estado: false,
-          mensaje: "Faltan datos obligatorios: orden, hora_desde, hora_hasta",
-        });
-      }
+      // 1. Llamamos al servicio (asumimos que el método se llama 'create')
+      const nuevoTurno = await this.turnosServicio.create(turno);
 
-      const id = await this.turnosServicio.createTurno({
-        orden,
-        hora_desde,
-        hora_hasta,
+      // 2. Devolvemos el objeto completo
+      res.status(201).json({
+        estado: true,
+        mensaje: "Turno creado correctamente",
+        turno: nuevoTurno,
       });
-
-      res
-        .status(201)
-        .json({ estado: true, mensaje: `Turno creado con ID: ${id}` });
     } catch (error) {
       console.error("Error en POST /turnos:", error);
       res.status(500).json({ estado: false, mensaje: "Error en el servidor" });
     }
   };
 
-  // Listar todos los turnos
-  readTurnos = async (req, res) => {
+  /**
+   * (Antes 'read')
+   * Lista todos los turnos.
+   */
+  read = async (req, res) => {
     try {
-      const turnos = await this.turnosServicio.readTurnos();
-      res.json({ estado: true, mensaje: turnos });
+      // 1. Llamamos al servicio (asumimos que el método se llama 'read')
+      const turnos = await this.turnosServicio.read();
+
+      // 2. Respuesta estandarizada
+      res.json({ estado: true, datos: turnos });
     } catch (error) {
       console.error("Error en GET /turnos:", error);
       res.status(500).json({ estado: false, mensaje: "Error en el servidor" });
     }
   };
 
-  // Buscar turno por ID
-  buscarTurnoPorId = async (req, res) => {
+  /**
+   * (Antes 'buscarTurnoPorId', estandarizado a 'buscarPorId')
+   * Busca un turno por su ID.
+   */
+  buscarPorId = async (req, res) => {
     try {
       const id = req.params.id;
-      const turno = await this.turnosServicio.buscarTurnoPorId(id);
+
+      // 1. Llamamos al servicio (asumimos 'buscarPorId')
+      const turno = await this.turnosServicio.buscarPorId(id);
 
       if (!turno) {
         return res
@@ -55,43 +64,55 @@ export default class TurnosControlador {
           .json({ estado: false, mensaje: "Turno no encontrado" });
       }
 
-      res.json({ estado: true, mensaje: turno });
+      // 2. Respuesta estandarizada
+      res.json({ estado: true, turno: turno });
     } catch (error) {
       console.error("Error en GET /turnos/:id:", error);
       res.status(500).json({ estado: false, mensaje: "Error en el servidor" });
     }
   };
 
-  // Actualizar turno
-  updateTurno = async (req, res) => {
+  /**
+   * (Se mantiene 'update')
+   * Actualiza un turno.
+   */
+  update = async (req, res) => {
     try {
       const id = req.params.id;
-      const { orden, hora_desde, hora_hasta } = req.body;
+      const turno = req.body;
 
-      const turnoActualizado = await this.turnosServicio.updateTurno(id, {
-        orden,
-        hora_desde,
-        hora_hasta,
-      });
+      // 1. Llamamos al servicio
+      const turnoActualizado = await this.turnosServicio.update(id, turno);
 
       if (!turnoActualizado) {
-        return res
-          .status(404)
-          .json({ estado: false, mensaje: "ID inválido o turno no encontrado" });
+        return res.status(404).json({
+          estado: false,
+          mensaje: "ID inválido o turno no encontrado",
+        });
       }
 
-      res.json({ estado: true, mensaje: "Turno actualizado correctamente" });
+      // 2. Respuesta estandarizada
+      res.json({
+        estado: true,
+        mensaje: "Turno actualizado correctamente",
+        turno: turnoActualizado, // Devolvemos el objeto actualizado
+      });
     } catch (error) {
       console.error("Error en PUT /turnos/:id:", error);
       res.status(500).json({ estado: false, mensaje: "Error en el servidor" });
     }
   };
 
-  // Eliminar turno
-  deleteTurno = async (req, res) => {
+  /**
+   * (Antes 'delete', cambiado a 'delete')
+   * Elimina un turno (borrado lógico).
+   */
+  delete = async (req, res) => {
     try {
       const id = req.params.id;
-      const filasAfectadas = await this.turnosServicio.deleteTurno(id);
+
+      // 1. Llamamos al servicio (asumimos 'delete')
+      const filasAfectadas = await this.turnosServicio.delete(id);
 
       if (!filasAfectadas) {
         return res

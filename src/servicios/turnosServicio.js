@@ -6,13 +6,13 @@ export default class TurnosServicio {
   }
 
   // Crear un turno
-  createTurno = (turno) => {
-    return this.turnos.createTurno(turno);
+  create = (turno) => {
+    return this.turnos.create(turno);
   };
 
   // Obtener todos los turnos activos
-  readTurnos = () => {
-    return this.turnos.readTurnos();
+  read = () => {
+    return this.turnos.read();
   };
 
   // Buscar un turno por su ID
@@ -21,12 +21,12 @@ export default class TurnosServicio {
   };
 
   // Actualizar un turno existente
-  updateTurno = (id, turno) => {
-    return this.turnos.updateTurno(id, turno);
+  update = (id, turno) => {
+    return this.turnos.update(id, turno);
   };
 
   // Eliminar un turno (marcar como inactivo)
-  deleteTurno = (id) => {
-    return this.turnos.deleteTurno(id);
+  delete = (id) => {
+    return this.turnos.delete(id);
   };
 }

@@ -51,7 +51,7 @@ const validacionesUpdate = [
  * /api/v1/usuarios:
  *   post:
  *     summary: Crea un nuevo usuario
- *     description: Solo los administradores pueden crear nuevos usuarios.
+ *     description: Solo los administradores pueden create nuevos usuarios.
  *     tags: [Usuarios]
  *     security:
  *       - bearerAuth: []
@@ -222,7 +222,7 @@ router.put(
  * /api/v1/usuarios/{usuario_id}:
  *   delete:
  *     summary: Elimina (borrado lógico) un usuario
- *     description: Solo los administradores pueden eliminar usuarios. El borrado es lógico, no físico.
+ *     description: Solo los administradores pueden delete usuarios. El borrado es lógico, no físico.
  *     tags: [Usuarios]
  *     security:
  *       - bearerAuth: []
@@ -232,7 +232,7 @@ router.put(
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID del usuario a eliminar
+ *         description: ID del usuario a delete
  *     responses:
  *       '200':
  *         description: Usuario eliminado exitosamente
