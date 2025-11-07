@@ -17,48 +17,6 @@ import { router as v1SalonesRutas } from "./v1/rutas/salonesRutas.js";
 
 const app = express();
 
-// --- 2. CONFIGURACIÓN DE SWAGGER ---
-const swaggerOptions = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "API Reservas Casa de Cumpleaños (PROG 3)",
-      version: "1.0.0",
-      description: "Documentación de la API de Reservas de Casa de Cumpleaños",
-    },
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-        },
-      },
-      schemas: {
-        ReservaInput: {
-          type: "object",
-          properties: {
-            /* ... (tus propiedades de reserva) ... */
-          },
-        },
-        UsuarioInput: {
-          type: "object",
-          properties: {
-            /* ... (tus propiedades de usuario) ... */
-          },
-        },
-      },
-    },
-    security: [{ bearerAuth: [] }],
-  },
-  // ---- ¡IMPORTANTE! Asegúrate que esta ruta sea correcta ----
-  apis: ["./src/v1/rutas/*.js"],
-};
-
-// 3. CREA LAS ESPECIFICACIONES
-const specs = swaggerJsdoc(swaggerOptions);
-
-// --- Middlewares ---
 app.use(express.json());
 passport.use(estrategia);
 passport.use(validacion);
