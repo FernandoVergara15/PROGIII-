@@ -16,7 +16,7 @@ cuando borraba el validadaor if, else if
 
 */
 
-const validar = (req, res, next) => {
+const validarCampos = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errores: errors.array() });
@@ -24,4 +24,4 @@ const validar = (req, res, next) => {
   next();
 };
 
-export default validar;
+export default validarCampos;
