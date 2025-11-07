@@ -1,6 +1,6 @@
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
-dotenv.config(); // carga las variables del .env
+dotenv.config(); 
 
 
 export const conexion = await mysql.createConnection({

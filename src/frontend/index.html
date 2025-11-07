@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Actualizar Perfil de Usuario</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        display: grid;
+        place-items: center;
+        min-height: 90vh;
+        background-color: #f4f5f7;
+      }
+      form {
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 24px 32px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        width: 400px;
+        border: 1px solid #e0e0e0;
+      }
+      h2 {
+        text-align: center;
+        color: #333;
+        margin-top: 0;
+      }
+      div {
+        margin-bottom: 16px;
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #555;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        background-color: #03912e; 
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      button:hover {
+        background-color: #027a26;
+      }
+      #mensaje {
+        text-align: center;
+        margin-top: 15px;
+        font-weight: 600;
+      }
+      .exito {
+        color: green;
+      }
+      .error {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <form id="formulario-usuario">
+      <h2>Actualizar Perfil</h2>
+
+      <div>
+        <label for="usuario_id">ID del Usuario (a actualizar):</label>
+        <input
+          type="number"
+          id="usuario_id"
+          name="usuario_id"
+          placeholder="Ej: 5 (Tu ID de Cliente)"
+          required
+        />
+      </div>
+      <hr style="border: 0; border-top: 1px solid #eee" />
+
+      <div>
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" value="Cristiano" required />
+      </div>
+
+      <div>
+        <label for="apellido">Apellido:</label>
+        <input
+          type="text"
+          id="apellido"
+          name="apellido"
+          value="Noaveira_Editado"
+          required
+        />
+      </div>
+
+      <div>
+        <label for="nombre_usuario">Email (nombre_usuario):</label>
+        <input
+          type="email"
+          id="nombre_usuario"
+          name="nombre_usuario"
+          value="ninguno_editado@correo.com"
+          required
+        />
+      </div>
+
+      <div>
+        <label for="foto">Actualizar Foto (Opcional):</label>
+        <input type="file" id="foto" name="foto" accept="image/*" />
+      </div>
+
+      <button type="submit">Actualizar Perfil</button>
+      <div id="mensaje"></div>
+    </form>
+
+    <script>
+      const formulario = document.getElementById("formulario-usuario");
+      const divMensaje = document.getElementById("mensaje");
+
+      formulario.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        divMensaje.textContent = "Actualizando...";
+        divMensaje.className = "";
+
+        const usuario_id = document.getElementById("usuario_id").value;
+        const nombre = document.getElementById("nombre").value;
+        const apellido = document.getElementById("apellido").value;
+        const nombre_usuario = document.getElementById("nombre_usuario").value;
+        const foto = document.getElementById("foto").files[0];
+
+
+        const TOKEN_CLIENTE =
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvX2lkIjoyLCJub21icmVfdXN1YXJpbyI6InBhbWdvbUBjb3JyZW8uY29tIiwidXN1YXJpbyI6IlBhbWVsYSBHw7NtZXoiLCJ0aXBvX3VzdWFyaW8iOjMsImlhdCI6MTc2MjU0MzA5MiwiZXhwIjoxNzYyNTQ2NjkyfQ.Idplk_0m3-qO4cBvyQgDdaGMQGBttSoDMWpK0TKw5AE";
+         
+        try {
+          let errores = [];
+
+          // --- PETICIÓN 1: Actualizar Datos de Texto (JSON) ---
+          const datosTexto = {
+            nombre: nombre,
+            apellido: apellido,
+            nombre_usuario: nombre_usuario,
+            tipo_usuario: 3, // Hardcodeado a Cliente (tipo 3)
+          };
+
+          const respuestaTexto = await fetch(
+            `http://localhost:3000/api/v1/usuarios/${usuario_id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${TOKEN_CLIENTE}`,
+              },
+              body: JSON.stringify(datosTexto),
+            }
+          );
+          
+          if (!respuestaTexto.ok) {
+            const resultado = await respuestaTexto.json();
+            errores.push(`Error al actualizar texto: ${resultado.mensaje}`);
+          }
+
+          // --- PETICIÓN 2: Actualizar Foto (FormData) (Solo si se seleccionó una) ---
+          if (foto) {
+            const formData = new FormData();
+            formData.append("foto", foto);
+
+            const respuestaFoto = await fetch(
+              `http://localhost:3000/api/v1/usuarios/${usuario_id}/foto`,
+              {
+                method: "PUT",
+                headers: {
+                  // No 'Content-Type', el navegador lo pone
+                  Authorization: `Bearer ${TOKEN_CLIENTE}`,
+                },
+                body: formData,
+              }
+            );
+            
+            if (!respuestaFoto.ok) {
+                const resultado = await respuestaFoto.json();
+                errores.push(`Error al subir foto: ${resultado.mensaje}`);
+            }
+          }
+
+          // --- Revisar Resultados ---
+          if (errores.length > 0) {
+            // Si hubo algún error, mostrarlo
+            divMensaje.textContent = errores.join(" | ");
+            divMensaje.className = "error";
+          } else {
+            // Si todo salió bien
+            divMensaje.textContent = "¡Perfil actualizado con éxito!";
+            divMensaje.className = "exito";
+            formulario.reset();
+          }
+
+        } catch (error) {
+          console.error("Error de red:", error);
+          divMensaje.textContent = "Error de conexión. Revisa la consola.";
+          divMensaje.className = "error";
+        }
+      });
+    </script>
+  </body>
+</html>

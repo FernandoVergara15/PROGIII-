@@ -6,7 +6,7 @@
 #🎫 SISTEMA DE RESERVA PARA EVENTOS
 
 Este proyecto permite gestionar reservas de usuarios para eventos, con integracion de base de datos y envio 📧 de correos.
-#🚀 Lanzamiento / Instalacion ' npm install , npm run des'
+#🚀 Lanzamiento / Instalacion ' npm install , npm run dev'
 # ⚙️- Tecnologias:  #Javascript ,nodejs
 # 🗄️-Base de Datos Mysql
 # 🌐-Web /Internet

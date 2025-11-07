@@ -86,11 +86,10 @@ export default class SalonesControlador {
     try {
       const id = req.params.id;
       const salon = { activo: 0 };
-      // inicializo el id en 0 para que no falle
+   
       const filasAfectadas = await this.salonesServicio.delete(id, salon);
       if (!filasAfectadas) {
-        // si es diferente a 0 o es decir mayor de los id creados
-        // no existe el id
+
         return res.status(404).json({
           estado: false,
           mensaje: "ingrese un ID válido para eliminarlo",

@@ -23,12 +23,9 @@ const validacionesTurno = [
     .notEmpty().withMessage("La 'hora_hasta' es requerida")
     .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
     .withMessage("El formato de 'hora_hasta' debe ser HH:MM"),
-  validarCampos, // Envía errores de validación como 400
+  validarCampos,
 ];
 
-// -----------------------------------------------------------------
-// RUTAS Y DOCUMENTACIÓN SWAGGER
-// -----------------------------------------------------------------
 
 /**
  * @swagger

@@ -1,13 +1,22 @@
 import express from "express";
 import { body } from "express-validator";
+import multer from "multer";
+
 import validarCampos from "../../middlewares/validarCampos.js";
 import autorizarUsuarios from "../../middlewares/autorizarUsuarios.js";
 import UsuariosControlador from "../../controladores/usuariosControlador.js";
+import { storage } from "../../config/multer.js"; // Asegúrate que este path sea correcto
 
 const usuariosControlador = new UsuariosControlador();
 const router = express.Router();
+const upload = multer({ storage });
 
-const validacionesCrear = [
+// --------------------
+// Validaciones
+// --------------------
+
+// Crear usuario (multipart/form-data)
+const validacionesCrearConFoto = [
   body("nombre").notEmpty().withMessage("El nombre es requerido"),
   body("apellido").notEmpty().withMessage("El apellido es requerido"),
   body("nombre_usuario")
@@ -18,47 +27,45 @@ const validacionesCrear = [
     .notEmpty()
     .isLength({ min: 6 })
     .withMessage("La contraseña debe tener al menos 6 caracteres"),
-  body("tipo_usuario")
-    .notEmpty()
-    .isInt({ min: 1, max: 3 })
-    .withMessage("El tipo de usuario es inválido (debe ser 1, 2 o 3)"),
   validarCampos,
 ];
 
+// Actualizar usuario (JSON)
 const validacionesUpdate = [
   body("nombre").notEmpty().withMessage("El nombre es requerido"),
   body("apellido").notEmpty().withMessage("El apellido es requerido"),
-  body("nombre_usuario")
-    .notEmpty()
-    .isEmail()
-    .withMessage("El email (nombre_usuario) es inválido"),
-  body("tipo_usuario")
-    .notEmpty()
-    .isInt({ min: 1, max: 3 })
-    .withMessage("El tipo de usuario es inválido (debe ser 1, 2 o 3)"),
+  // ... otras validaciones de update
   validarCampos,
 ];
+
+// --------------------
+// Swagger Tags
+// --------------------
 
 /**
  * @swagger
  * tags:
- *   name: Usuarios
- *   description: Endpoints para la gestión de usuarios (solo administradores)
+ *   - name: Usuarios
+ *     description: Endpoints para la gestión de usuarios
  */
+
+// --------------------
+// Rutas
+// --------------------
 
 /**
  * @swagger
  * /api/v1/usuarios:
  *   post:
- *     summary: Crea un nuevo usuario
- *     description: Solo los administradores pueden create nuevos usuarios.
+ *     summary: Crea un nuevo usuario (con foto)
+ *     description: Solo los administradores pueden crear nuevos usuarios. Recibe multipart/form-data.
  *     tags: [Usuarios]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
@@ -66,42 +73,41 @@ const validacionesUpdate = [
  *               - apellido
  *               - nombre_usuario
  *               - contrasenia
- *               - tipo_usuario
  *             properties:
  *               nombre:
  *                 type: string
- *                 example: "Juan"
+ *                 example: "Cristiano"
  *               apellido:
  *                 type: string
- *                 example: "Pérez"
+ *                 example: "Noaveira"
  *               nombre_usuario:
  *                 type: string
  *                 format: email
- *                 example: "juan.perez@email.com"
+ *                 example: "ninguno@correo.com"
  *               contrasenia:
  *                 type: string
- *                 example: "123456"
+ *                 example: "ninguno"
  *               tipo_usuario:
  *                 type: integer
- *                 enum: [1, 2, 3]
- *                 example: 2
- *                 description: "1 = Admin, 2 = Empleado, 3 = Cliente"
+ *                 example: 3
+ *                 description: "Hardcodeado por el frontend (3 = Cliente)"
+ *               foto:
+ *                 type: string
+ *                 format: binary
+ *                 description: "Archivo de imagen (opcional)"
  *     responses:
  *       '201':
  *         description: Usuario creado exitosamente
  *       '400':
  *         description: Datos inválidos
- *       '401':
- *         description: No autenticado
  *       '403':
- *         description: No autorizado (solo admins)
- *       '500':
- *         description: Error interno del servidor
+ *         description: No autorizado
  */
 router.post(
   "/",
   autorizarUsuarios([1]),
-  validacionesCrear,
+  upload.single("foto"),
+  validacionesCrearConFoto,
   usuariosControlador.create
 );
 
@@ -110,19 +116,12 @@ router.post(
  * /api/v1/usuarios:
  *   get:
  *     summary: Lista todos los usuarios
- *     description: Solo administradores y empleados pueden ver la lista completa de usuarios.
  *     tags: [Usuarios]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       '200':
- *         description: Lista de usuarios obtenida correctamente
- *       '401':
- *         description: No autenticado
- *       '403':
- *         description: No autorizado
- *       '500':
- *         description: Error interno del servidor
+ *         description: Lista de usuarios
  */
 router.get("/", autorizarUsuarios([1, 2]), usuariosControlador.read);
 
@@ -131,7 +130,6 @@ router.get("/", autorizarUsuarios([1, 2]), usuariosControlador.read);
  * /api/v1/usuarios/{usuario_id}:
  *   get:
  *     summary: Obtiene un usuario por su ID
- *     description: Solo administradores y empleados pueden consultar datos de usuarios.
  *     tags: [Usuarios]
  *     security:
  *       - bearerAuth: []
@@ -141,18 +139,11 @@ router.get("/", autorizarUsuarios([1, 2]), usuariosControlador.read);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID del usuario a buscar
  *     responses:
  *       '200':
  *         description: Usuario encontrado
- *       '401':
- *         description: No autenticado
- *       '403':
- *         description: No autorizado
  *       '404':
  *         description: Usuario no encontrado
- *       '500':
- *         description: Error interno del servidor
  */
 router.get(
   "/:usuario_id",
@@ -164,8 +155,8 @@ router.get(
  * @swagger
  * /api/v1/usuarios/{usuario_id}:
  *   put:
- *     summary: Actualiza un usuario existente
- *     description: Solo los administradores pueden modificar los datos de un usuario.
+ *     summary: Actualiza un usuario existente (datos de texto)
+ *     description: Solo Admins. Actualiza datos de perfil, NO la foto.
  *     tags: [Usuarios]
  *     security:
  *       - bearerAuth: []
@@ -175,40 +166,17 @@ router.get(
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID del usuario a actualizar
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               nombre:
- *                 type: string
- *                 example: "María"
- *               apellido:
- *                 type: string
- *                 example: "García"
- *               nombre_usuario:
- *                 type: string
- *                 example: "maria.garcia@email.com"
- *               tipo_usuario:
- *                 type: integer
- *                 enum: [1, 2, 3]
- *                 example: 3
+ *             $ref: '#/components/schemas/UsuarioInput'
  *     responses:
  *       '200':
- *         description: Usuario actualizado exitosamente
- *       '400':
- *         description: Datos inválidos
- *       '401':
- *         description: No autenticado
- *       '403':
- *         description: No autorizado
+ *         description: Usuario actualizado
  *       '404':
  *         description: Usuario no encontrado
- *       '500':
- *         description: Error interno del servidor
  */
 router.put(
   "/:usuario_id",
@@ -222,7 +190,6 @@ router.put(
  * /api/v1/usuarios/{usuario_id}:
  *   delete:
  *     summary: Elimina (borrado lógico) un usuario
- *     description: Solo los administradores pueden delete usuarios. El borrado es lógico, no físico.
  *     tags: [Usuarios]
  *     security:
  *       - bearerAuth: []
@@ -232,23 +199,55 @@ router.put(
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID del usuario a delete
  *     responses:
  *       '200':
- *         description: Usuario eliminado exitosamente
- *       '401':
- *         description: No autenticado
- *       '403':
- *         description: No autorizado
+ *         description: Usuario eliminado
  *       '404':
  *         description: Usuario no encontrado
- *       '500':
- *         description: Error interno del servidor
  */
 router.delete(
   "/:usuario_id",
   autorizarUsuarios([1]),
   usuariosControlador.delete
+);
+
+/**
+ * @swagger
+ * /api/v1/usuarios/{usuario_id}/foto:
+ *   put:
+ *     summary: Actualiza la foto de un usuario
+ *     description: Permite a un usuario (o admin) actualizar su foto de perfil.
+ *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: usuario_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               foto:
+ *                 type: string
+ *                 format: binary
+ *                 description: "Archivo de imagen"
+ *     responses:
+ *       '200':
+ *         description: Foto actualizada
+ *       '404':
+ *         description: Usuario no encontrado
+ */
+router.put(
+  "/:usuario_id/foto",
+  autorizarUsuarios([3]),
+  upload.single("foto"),
+  usuariosControlador.updateFoto
 );
 
 export { router };

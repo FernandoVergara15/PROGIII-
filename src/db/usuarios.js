@@ -58,17 +58,25 @@ export default class Usuarios {
   };
 
   update = async (usuario_id, usuario) => {
-    const { nombre, apellido, nombre_usuario, tipo_usuario } = usuario;
+    const { nombre, apellido, nombre_usuario, tipo_usuario, foto } = usuario;
 
     const sql = `UPDATE usuarios SET 
                     nombre = ?,
                     apellido = ?,
                     nombre_usuario = ?,
                     tipo_usuario = ?,
+                    foto = ?,
                     modificado = NOW()
                  WHERE usuario_id = ? AND activo = 1`;
 
-    const params = [nombre, apellido, nombre_usuario, tipo_usuario, usuario_id];
+    const params = [
+      nombre,
+      apellido,
+      nombre_usuario,
+      tipo_usuario,
+      foto,
+      usuario_id,
+    ];
 
     const [result] = await conexion.execute(sql, params);
 
@@ -114,5 +122,20 @@ export default class Usuarios {
 
     const [result] = await conexion.query(sql, [usuario_id]);
     return result[0];
+  };
+
+  updateFoto = async (usuario_id, foto) => {
+    const sql = `
+    UPDATE usuarios 
+    SET foto = ?, modificado = NOW() 
+    WHERE usuario_id = ? AND activo = 1
+  `;
+    const params = [foto, usuario_id];
+
+    const [result] = await conexion.execute(sql, params);
+
+    if (result.affectedRows === 0) return null;
+
+    return this.buscarPorId(usuario_id);
   };
 }

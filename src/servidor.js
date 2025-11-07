@@ -1,6 +1,8 @@
 import app from "./reservas.js";
 import setupSwagger from "./config/swagger.js";
 
+//  Configurar Swagger
+//  (debe ir antes de iniciar el servidor)
 setupSwagger(app);
 
 process.loadEnvFile();

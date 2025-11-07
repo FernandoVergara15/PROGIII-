@@ -1,7 +1,6 @@
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 
-// 1. Opciones de Configuración (Igual que antes)
 const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
@@ -20,7 +19,7 @@ const swaggerOptions = {
           description: "Pega tu token JWT (obtenido de /auth/login)",
         },
       },
-      // ---- Definimos los Schemas (Modelos de datos) ----
+      // ---- Schemas (Modelos de datos) ----
       schemas: {
         ReservaInput: {
           type: "object",
@@ -58,7 +57,7 @@ const swaggerOptions = {
             tipo_usuario: { type: "integer", example: 3 },
           },
         },
-        // ... (Puedes añadir Schemas para Login, Salones, Servicios)
+      
       },
     },
     // ---- Seguridad Global ----
@@ -76,18 +75,14 @@ const swaggerOptions = {
       "./src/v1/rutas/salonesRutas.js",
       "./src/v1/rutas/reservasRutas.js",
       "./src/v1/rutas/turnosRutas.js",
-  ], // ¡Ajusta esta ruta a tu proyecto!
+  ], 
 };
 
-// 2. Genera las especificaciones
 const specs = swaggerJsdoc(swaggerOptions);
 
-/**
- * Función que configura e inicializa Swagger UI en la app de Express.
- * @param {object} app - La instancia de la aplicación Express.
- */
+
 const setupSwagger = (app) => {
-  // 3. Crea la ruta pública para la UI de Swagger
+ 
   app.use(
     "/api-docs",
     swaggerUi.serve,
@@ -95,5 +90,4 @@ const setupSwagger = (app) => {
   );
 };
 
-// 4. Exporta la función de configuración
 export default setupSwagger;

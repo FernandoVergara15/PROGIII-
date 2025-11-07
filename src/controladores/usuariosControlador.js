@@ -77,12 +77,15 @@ export default class UsuariosControlador {
 
   update = async (req, res) => {
     try {
-      const { usuario_id } = req.params;
-      const usuario = req.body;
+      const usuario_id = req.params.usuario_id;
+
+      const foto = req.file ? req.file.filename : null;
+      console.log("Archivo subido:", foto);
+      const datos = { ...req.body, foto };
 
       const usuarioActualizado = await this.usuariosServicio.update(
         usuario_id,
-        usuario
+        datos
       );
 
       if (!usuarioActualizado) {
@@ -125,6 +128,49 @@ export default class UsuariosControlador {
       });
     } catch (err) {
       console.log(`Error en DELETE /usuarios/${req.params.usuario_id}:`, err);
+      res.status(500).json({
+        estado: false,
+        mensaje: "Error interno del servidor.",
+      });
+    }
+  };
+
+  updateFoto = async (req, res) => {
+    try {
+      const usuario_id = req.params.usuario_id;
+      const foto = req.file ? req.file.filename : null;
+      console.log(foto,"cargada")
+
+      if (!foto) {
+        return res.status(400).json({
+          estado: false,
+          mensaje: "No se envió ningún archivo de foto.",
+        });
+      }
+
+      // llama al servicio que actualiza solo la foto
+      const usuarioActualizado = await this.usuariosServicio.updateFoto(
+        usuario_id,
+        foto
+      );
+
+      if (!usuarioActualizado) {
+        return res.status(404).json({
+          estado: false,
+          mensaje: "Usuario no encontrado.",
+        });
+      }
+
+      res.json({
+        estado: true,
+        mensaje: "Foto actualizada correctamente.",
+        usuario: usuarioActualizado,
+      });
+    } catch (err) {
+      console.error(
+        `Error en PUT /usuarios/${req.params.usuario_id}/foto:`,
+        err
+      );
       res.status(500).json({
         estado: false,
         mensaje: "Error interno del servidor.",

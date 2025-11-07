@@ -158,4 +158,6 @@ export default class ReservasServicio {
   obtenerEstadisticas = async () => {
     return await this.reserva.estadistica();
   };
+
+  
 }

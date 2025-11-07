@@ -32,6 +32,11 @@ export default class UsuariosService {
   };
 
   update = async (usuario_id, usuario) => {
+    const usuario_existente = await this.usuarios.buscarPorId(usuario_id);
+
+    if (!usuario_existente) {
+      return null; 
+    }
     return await this.usuarios.update(usuario_id, usuario);
   };
 
@@ -46,4 +51,12 @@ export default class UsuariosService {
   buscarParaPayload = async (usuario_id) => {
     return await this.usuarios.buscarParaPayload(usuario_id);
   };
+
+  updateFoto = async (usuario_id, foto) => {
+  const usuarioExistente = await this.usuarios.buscarPorId(usuario_id);
+  if (!usuarioExistente) return null;
+
+  return await this.usuarios.updateFoto(usuario_id, foto);
+};
+
 }

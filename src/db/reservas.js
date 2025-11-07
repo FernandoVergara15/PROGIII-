@@ -160,6 +160,18 @@ export default class Reservas {
     return datos[0];
   };
 
+  buscarEmailsAdmins = async () => {
+    const sql = `
+      SELECT nombre_usuario 
+      FROM usuarios 
+      WHERE tipo_usuario = 1 AND activo = 1
+    `;
+    
+    const [rows] = await conexion.execute(sql);
+    
+    return rows.map(admin => admin.nombre_usuario);
+  };
+
   buscarDatosReporteCsv = async () => {
     const sql = `CALL reporte_csv()`;
     const [result] = await conexion.query(sql);
