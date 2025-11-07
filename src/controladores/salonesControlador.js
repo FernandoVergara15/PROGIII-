@@ -4,32 +4,12 @@ export default class SalonesControlador {
   constructor() {
     this.salonesServicio = new SalonesServicio();
   }
-  createSalon = async (req, res) => {
+  create = async (req, res) => {
     try {
       // desestructuración
       const { titulo, direccion, capacidad, importe } = req.body;
 
-      /* validación CON IF Y ELSE IF, SE SUPLANTO POR EXPRESS VALIDATOR 
-      if (!titulo) {
-        return res
-          .status(400)
-          .json({ estado: false, mensaje: "Faltan el titulo" });
-      } else if (!direccion) {
-        return res
-          .status(400)
-          .json({ estado: false, mensaje: "Faltan la direccion" });
-      } else if (!capacidad) {
-        return res
-          .status(400)
-          .json({ estado: false, mensaje: "Faltan la capacidad" });
-      } else if (!importe) {
-        return res
-          .status(400)
-          .json({ estado: false, mensaje: "Faltan el importe" });
-      } */
-
-      // llamar al servicio
-      const id = await this.salonesServicio.createSalon({
+      const id = await this.salonesServicio.create({
         titulo,
         direccion,
         capacidad,
@@ -44,10 +24,10 @@ export default class SalonesControlador {
     }
   };
 
-  readSalones = async (req, res) => {
+  read = async (req, res) => {
     try {
       const { pagina = 1, limite = 8 } = req.query;
-      const salones = await this.salonesServicio.readSalones();
+      const salones = await this.salonesServicio.read();
 
       const salonesPaginados = salones
         .filter((s) => s.activo)
@@ -60,17 +40,15 @@ export default class SalonesControlador {
     }
   };
 
-  buscarSalonPorId = async (req, res) => {
+  buscarPorId = async (req, res) => {
     try {
       const id = req.params.id;
-      const salon = await this.salonesServicio.buscarSalonPorId(id);
+      const salon = await this.salonesServicio.buscarPorId(id);
       if (!salon) {
-        return res
-          .status(404)
-          .json({
-            estado: false,
-            mensaje: "ese ID no existe en la base de datos",
-          });
+        return res.status(404).json({
+          estado: false,
+          mensaje: "ese ID no existe en la base de datos",
+        });
       } else if (salon.activo === 0) {
         return res
           .status(404)
@@ -84,12 +62,12 @@ export default class SalonesControlador {
     }
   };
 
-  updateSalon = async (req, res) => {
+  update = async (req, res) => {
     try {
       const id = req.params.id;
       const { titulo, direccion, capacidad, importe } = req.body;
       const salon = { titulo, direccion, capacidad, importe };
-      const filasAfectadas = await this.salonesServicio.updateSalon(id, salon);
+      const filasAfectadas = await this.salonesServicio.update(id, salon);
       if (filasAfectadas === null) {
         return res.status(400).json({
           estado: false,
@@ -104,21 +82,19 @@ export default class SalonesControlador {
     }
   };
 
-  deleteSalon = async (req, res) => {
+  delete = async (req, res) => {
     try {
       const id = req.params.id;
       const salon = { activo: 0 };
       // inicializo el id en 0 para que no falle
-      const filasAfectadas = await this.salonesServicio.deleteSalon(id, salon);
+      const filasAfectadas = await this.salonesServicio.delete(id, salon);
       if (!filasAfectadas) {
         // si es diferente a 0 o es decir mayor de los id creados
         // no existe el id
-        return res
-          .status(404)
-          .json({
-            estado: false,
-            mensaje: "ingrese un ID válido para eliminarlo",
-          });
+        return res.status(404).json({
+          estado: false,
+          mensaje: "ingrese un ID válido para eliminarlo",
+        });
       }
       res.json({ estado: true, mensaje: "Salón eliminado correctamente" });
     } catch (error) {

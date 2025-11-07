@@ -5,19 +5,23 @@ export default class SalonesServicio {
     this.salones = new Salones();
   }
 
-  createSalon = (salon) => {
-    return this.salones.createSalon(salon);
+  create = (salon) => {
+    return this.salones.create(salon);
   };
-  readSalones = () => {
-    return this.salones.readSalones();
+  read = () => {
+    return this.salones.read();
   };
-  buscarSalonPorId(salon_id) {
-    return this.salones.buscarSalonPorId(salon_id);
+  buscarPorId(salon_id) {
+    return this.salones.buscarPorId(salon_id);
   }
-  updateSalon(id,salon) {
-    return this.salones.updateSalon(id, salon);
+  update(id, salon) {
+    const existe = this.salones.update(id, salon);
+    if (!existe) {
+      return null;
+    }
+    return this.salones.update(id, salon);
   }
-  deleteSalon(id) {
-    return this.salones.deleteSalon(id);
+  delete(id) {
+    return this.salones.delete(id);
   }
 }
