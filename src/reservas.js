@@ -20,7 +20,6 @@ import { router as v1TurnosRutas } from "./v1/rutas/turnosRutas.js";
 
 const app = express();
 
-
 app.use(express.json());
 
 passport.use(estrategia);
@@ -40,7 +39,7 @@ app.use(cors());
 app.use(express.json());
 
 // --- Servir frontend ---
-app.use("/", express.static(path.join(process.cwd(), "frontend")))
+app.use("/", express.static(path.join(process.cwd(), "frontend")));
 
 // --- RUTAS PÚBLICAS ---
 app.use("/api/v1/auth", v1AuthRouter);
