@@ -1,20 +1,5 @@
 import express from "express";
-import passport from "passport";
-import morgan from "morgan";
-import fs from "fs";
-
-// --- 1. IMPORTA SWAGGER ---
-import swaggerUi from "swagger-ui-express";
-import swaggerJsdoc from "swagger-jsdoc";
-
-import { estrategia, validacion } from "./config/passport.js";
-
-import { router as v1AuthRouter } from "./v1/rutas/authRoutes.js";
-import { router as v1ReservasRutas } from "./v1/rutas/reservasRutas.js";
-import { router as v1UsuariosRutas } from "./v1/rutas/usuariosRutas.js";
-import { router as v1ServiciosRutas } from "./v1/rutas/serviciosRutas.js";
-import { router as v1SalonesRutas } from "./v1/rutas/salonesRutas.js";
-import { router as v1TurnosRutas } from "./v1/rutas/turnosRutas.js";
+import { router as v1salonesRutas } from "./v1/Rutas/salonesRutas.js";
 
 const app = express();
 
@@ -23,9 +8,9 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "API Reservas Casa de Cumpleaños (PROG 3)",
+      title: "API Salones de Fiestas (PROG 3)",
       version: "1.0.0",
-      description: "Documentación de la API de Reservas de Casa de Cumpleaños",
+      description: "Documentación de la API de Reservas de Salones",
     },
     components: {
       securitySchemes: {
@@ -38,22 +23,18 @@ const swaggerOptions = {
       schemas: {
         ReservaInput: {
           type: "object",
-          properties: {
-            /* ... (tus propiedades de reserva) ... */
-          },
+          properties: { /* ... (tus propiedades de reserva) ... */ },
         },
         UsuarioInput: {
           type: "object",
-          properties: {
-            /* ... (tus propiedades de usuario) ... */
-          },
+          properties: { /* ... (tus propiedades de usuario) ... */ },
         },
       },
     },
-    security: [{ bearerAuth: [] }],
+    security: [ { bearerAuth: [] } ],
   },
   // ---- ¡IMPORTANTE! Asegúrate que esta ruta sea correcta ----
-  apis: ["./src/v1/rutas/*.js"],
+  apis: ["./src/v1/rutas/*.js"], 
 };
 
 // 3. CREA LAS ESPECIFICACIONES
@@ -61,49 +42,12 @@ const specs = swaggerJsdoc(swaggerOptions);
 
 // --- Middlewares ---
 app.use(express.json());
-passport.use(estrategia);
-passport.use(validacion);
-app.use(passport.initialize());
 
-// morgan
-let log = fs.createWriteStream("./access.log", { flags: "a" });
-app.use(morgan("combined"));
-app.use(morgan("combined", { stream: log }));
-// --- RUTAS PÚBLICAS ---
-app.use("/api/v1/auth", v1AuthRouter);
+app.use("/api/v1/createSalones", v1salonesRutas);
+app.use("/api/v1/readSalones", v1salonesRutas);
+app.use("/api/v1/buscarSalonPorId", v1salonesRutas);
+app.use("/api/v1/updateSalon", v1salonesRutas);
+app.use("/api/v1/deleteSalon", v1salonesRutas);
 
-// 4. SIRVE LA DOCUMENTACIÓN (Ruta pública)
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(specs, { explorer: true })
-);
-
-// --- RUTAS PROTEGIDAS ---
-app.use(
-  "/api/v1/reservas",
-  passport.authenticate("jwt", { session: false }),
-  v1ReservasRutas
-);
-app.use(
-  "/api/v1/usuarios",
-  passport.authenticate("jwt", { session: false }),
-  v1UsuariosRutas
-);
-app.use(
-  "/api/v1/servicios",
-  passport.authenticate("jwt", { session: false }),
-  v1ServiciosRutas
-);
-app.use(
-  "/api/v1/salones",
-  passport.authenticate("jwt", { session: false }),
-  v1SalonesRutas
-);
-app.use(
-  "/api/v1/turnos",
-  passport.authenticate("jwt", { session: false }),
-  v1TurnosRutas
-);
-
+// Configurar dotenv para cargar variables de entorno
 export default app;
